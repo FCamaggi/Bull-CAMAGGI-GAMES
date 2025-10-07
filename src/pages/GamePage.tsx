@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import HostControlPanel from '../components/HostControlPanel';
+import type { BullRound } from '../types';
 
 interface GamePageProps {
   game: any;
@@ -24,7 +25,7 @@ export default function GamePage({ game }: GamePageProps) {
     currentRound: gameState?.currentRound,
     totalRounds: gameState?.rounds?.length,
     hasSelectedPlayers: !!gameState?.rounds?.find(
-      (r) => r.number === gameState?.currentRound
+      (r: BullRound) => r.number === gameState?.currentRound
     )?.selectedPlayers,
   });
 
