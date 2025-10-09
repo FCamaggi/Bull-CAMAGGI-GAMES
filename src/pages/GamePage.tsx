@@ -220,6 +220,18 @@ export default function GamePage({ game }: GamePageProps) {
 
                     {!hasSubmittedAnswer ? (
                       <div className="space-y-lg">
+                        {/* Formato sugerido */}
+                        {currentRound?.suggestedFormat && (
+                          <div className="bg-blue-600/10 border border-blue-600/30 rounded p-sm text-left mb-md">
+                            <div className="text-sm font-bold text-blue-600 mb-xs">
+                              � Formato sugerido:
+                            </div>
+                            <p className="text-sm text-secondary">
+                              {currentRound.suggestedFormat}
+                            </p>
+                          </div>
+                        )}
+
                         {/* Consejos */}
                         <div className="bg-accent/10 border border-accent/30 rounded p-sm text-left">
                           <div className="text-sm font-bold text-accent mb-xs">
@@ -227,16 +239,14 @@ export default function GamePage({ game }: GamePageProps) {
                           </div>
                           <ul className="text-xs text-secondary space-y-xs">
                             <li>
-                              ✓ <strong>Cuida tu ortografía</strong> - Las
-                              respuestas bien escritas son más creíbles
-                            </li>
-                            <li>
-                              ✓ <strong>Usa mayúsculas correctamente</strong> -
-                              Empieza con mayúscula, como la respuesta real
-                            </li>
-                            <li>
                               ✓ <strong>Sé convincente</strong> - Intenta que
                               suene como la respuesta correcta
+                            </li>
+                            <li>
+                              ⚠️ <strong>No copies las respuestas</strong> - Tu respuesta no puede ser igual a la correcta o incorrecta
+                            </li>
+                            <li>
+                              ✓ <strong>Sigue el formato</strong> - Respeta el estilo sugerido arriba
                             </li>
                           </ul>
                         </div>
