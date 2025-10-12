@@ -1,5 +1,6 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import HostControlPanel from '../components/HostControlPanel';
+import { useAnswerValidation } from '../hooks/useValidation';
 import type { BullRound } from '../types';
 
 interface GamePageProps {
@@ -14,6 +15,17 @@ export default function GamePage({ game }: GamePageProps) {
   const [confirmedVote, setConfirmedVote] = useState(false);
   const [hasSubmittedAnswer, setHasSubmittedAnswer] = useState(false);
   const [isReady, setIsReady] = useState(false);
+  const [validationError, setValidationError] = useState<string | null>(null);
+
+  // Obtener la ronda actual para validaciones
+  const currentRound = useMemo(() => {
+    return gameState?.rounds?.find(
+      (r: BullRound) => r.number === gameState?.currentRound
+    );
+  }, [gameState]);
+
+  // Hook de validación para respuestas
+  const validateAnswer = useAnswerValidation(currentRound);
 
   console.log('🎮 GamePage render:', {
     gameState: gameState?.phase,
@@ -35,7 +47,23 @@ export default function GamePage({ game }: GamePageProps) {
     setIsReady(false);
     setSelectedVote(null);
     setConfirmedVote(false);
+    setCurrentAnswer('');
+    setValidationError(null);
   }, [gameState?.currentRound]);
+
+  // Validar respuesta en tiempo real cuando cambia
+  useEffect(() => {
+    if (currentAnswer.trim().length > 0) {
+      const validation = validateAnswer(currentAnswer);
+      if (!validation.isValid) {
+        setValidationError(validation.error || 'Error de validación');
+      } else {
+        setValidationError(null);
+      }
+    } else {
+      setValidationError(null);
+    }
+  }, [currentAnswer, validateAnswer]);
 
   if (!gameState) {
     return (
@@ -243,10 +271,13 @@ export default function GamePage({ game }: GamePageProps) {
                               suene como la respuesta correcta
                             </li>
                             <li>
-                              ⚠️ <strong>No copies las respuestas</strong> - Tu respuesta no puede ser igual a la correcta o incorrecta
+                              ⚠️ <strong>No copies las respuestas</strong> - Tu
+                              respuesta no puede ser igual a la correcta o
+                              incorrecta
                             </li>
                             <li>
-                              ✓ <strong>Sigue el formato</strong> - Respeta el estilo sugerido arriba
+                              ✓ <strong>Sigue el formato</strong> - Respeta el
+                              estilo sugerido arriba
                             </li>
                           </ul>
                         </div>
@@ -261,23 +292,37 @@ export default function GamePage({ game }: GamePageProps) {
                             value={currentAnswer}
                             onChange={(e) => setCurrentAnswer(e.target.value)}
                             placeholder="Escribe una respuesta convincente..."
-                            maxLength={100}
+                            maxLength={120}
                           />
                           <p className="text-sm text-muted mt-sm text-right">
-                            {currentAnswer.length}/100 caracteres
+                            {currentAnswer.length}/120 caracteres
                           </p>
                         </div>
 
+                        {/* Mostrar error de validación si existe */}
+                        {validationError && (
+                          <div className="bg-red-600/10 border border-red-600/30 rounded p-sm mb-md">
+                            <div className="text-sm font-bold text-red-600 mb-xs">
+                              ⚠️ Error:
+                            </div>
+                            <p className="text-red-600 text-sm">{validationError}</p>
+                          </div>
+                        )}
+
                         <button
                           onClick={() => {
-                            if (currentAnswer.trim()) {
-                              socket.emit('submit_answer', {
-                                answer: currentAnswer.trim(),
-                              });
-                              setHasSubmittedAnswer(true);
+                            const validation = validateAnswer(currentAnswer);
+                            if (!validation.isValid) {
+                              setValidationError(validation.error || 'Error de validación');
+                              return;
                             }
+                            
+                            socket.emit('submit_answer', {
+                              answer: currentAnswer.trim(),
+                            });
+                            setHasSubmittedAnswer(true);
                           }}
-                          disabled={!currentAnswer.trim()}
+                          disabled={!currentAnswer.trim() || !!validationError}
                           className="btn btn-primary btn-mobile"
                         >
                           📤 Enviar Respuesta

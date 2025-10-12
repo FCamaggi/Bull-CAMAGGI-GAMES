@@ -30,6 +30,49 @@ const initialGameData: GameData = {
   lastResults: null
 };
 
+// Funciones de persistencia local
+const saveGameState = (playerName: string, lobbyCode: string, playerId: string) => {
+  try {
+    const gameData = {
+      playerName,
+      lobbyCode,
+      playerId,
+      timestamp: new Date().toISOString()
+    };
+    localStorage.setItem('bull-game-state', JSON.stringify(gameData));
+  } catch (error) {
+    console.warn('No se pudo guardar el estado del juego:', error);
+  }
+};
+
+const loadGameState = () => {
+  try {
+    const saved = localStorage.getItem('bull-game-state');
+    if (saved) {
+      const data = JSON.parse(saved);
+      // Solo usar si es reciente (menos de 1 hora)
+      const timestamp = new Date(data.timestamp);
+      const now = new Date();
+      const hourAgo = new Date(now.getTime() - 60 * 60 * 1000);
+      
+      if (timestamp > hourAgo) {
+        return data;
+      }
+    }
+  } catch (error) {
+    console.warn('No se pudo cargar el estado del juego:', error);
+  }
+  return null;
+};
+
+const clearGameState = () => {
+  try {
+    localStorage.removeItem('bull-game-state');
+  } catch (error) {
+    console.warn('No se pudo limpiar el estado del juego:', error);
+  }
+};
+
 export const useGame = () => {
   const [appState, setAppState] = useState<AppState>(initialAppState);
   const [gameData, setGameData] = useState<GameData>(initialGameData);
@@ -58,6 +101,10 @@ export const useGame = () => {
 
     addListener('lobby_created', ({ lobby, playerId }) => {
       console.log('Lobby creado:', lobby.code);
+      // Guardar estado para reconexión
+      if (appState.playerName) {
+        saveGameState(appState.playerName, lobby.code, playerId);
+      }
       setAppState(prev => ({
         ...prev,
         currentPage: 'lobby',
@@ -69,6 +116,10 @@ export const useGame = () => {
 
     addListener('lobby_joined', ({ lobby, playerId }) => {
       console.log('Unido al lobby:', lobby.code);
+      // Guardar estado para reconexión
+      if (appState.playerName) {
+        saveGameState(appState.playerName, lobby.code, playerId);
+      }
       setAppState(prev => ({
         ...prev,
         currentPage: 'lobby',
@@ -164,6 +215,22 @@ export const useGame = () => {
       setAppState(prev => ({ ...prev, error: `${field}: ${message}` }));
     });
 
+    addListener('reconnected', ({ lobby, gameState, playerId }) => {
+      console.log('Reconectado exitosamente:', lobby?.code);
+      setAppState(prev => ({
+        ...prev,
+        currentPage: lobby?.gameState ? 'game' : 'lobby',
+        lobby,
+        gameState,
+        playerId: playerId || prev.playerId,
+        error: undefined
+      }));
+    });
+
+    addListener('player_reconnected', ({ playerName }) => {
+      console.log(`Jugador ${playerName} se reconectó`);
+    });
+
     return () => {
       unsubscribers.forEach(unsubscribe => unsubscribe());
     };
@@ -195,6 +262,7 @@ export const useGame = () => {
 
     leaveLobby: useCallback(() => {
       emit('leave_lobby');
+      clearGameState(); // Limpiar estado guardado
       setAppState(initialAppState);
       setGameData(initialGameData);
     }, [emit]),
@@ -229,6 +297,24 @@ export const useGame = () => {
 
     clearError: useCallback(() => {
       setAppState(prev => ({ ...prev, error: undefined }));
+    }, []),
+
+    // Funciones de reconexión
+    reconnectByName: useCallback((playerName: string, lobbyCode: string) => {
+      emit('reconnect_by_name', { playerName, lobbyCode });
+    }, [emit]),
+
+    reconnectById: useCallback((playerId: string, lobbyCode: string) => {
+      emit('reconnect_attempt', { playerId, lobbyCode });
+    }, [emit]),
+
+    // Funciones de estado persistente
+    getSavedGameState: useCallback(() => {
+      return loadGameState();
+    }, []),
+
+    clearSavedGameState: useCallback(() => {
+      clearGameState();
     }, [])
   };
 

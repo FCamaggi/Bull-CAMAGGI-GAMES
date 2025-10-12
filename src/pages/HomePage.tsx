@@ -1,4 +1,5 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useValidation } from '../hooks/useValidation';
 
 interface HomePageProps {
   game: any; // Usamos any por ahora para evitar errores de tipos
@@ -9,9 +10,45 @@ export default function HomePage({ game }: HomePageProps) {
   const [lobbyCode, setLobbyCode] = useState('');
   const [isCreating, setIsCreating] = useState(false);
   const [isJoining, setIsJoining] = useState(false);
+  const [nameError, setNameError] = useState<string | null>(null);
+  const [codeError, setCodeError] = useState<string | null>(null);
+
+  const { validatePlayerName, validateLobbyCode } = useValidation();
+
+  // Validar nombre en tiempo real
+  useEffect(() => {
+    if (playerName.trim().length > 0) {
+      const validation = validatePlayerName(playerName);
+      if (!validation.isValid) {
+        setNameError(validation.error || 'Error en el nombre');
+      } else {
+        setNameError(null);
+      }
+    } else {
+      setNameError(null);
+    }
+  }, [playerName, validatePlayerName]);
+
+  // Validar código de lobby en tiempo real
+  useEffect(() => {
+    if (lobbyCode.trim().length > 0) {
+      const validation = validateLobbyCode(lobbyCode);
+      if (!validation.isValid) {
+        setCodeError(validation.error || 'Error en el código');
+      } else {
+        setCodeError(null);
+      }
+    } else {
+      setCodeError(null);
+    }
+  }, [lobbyCode, validateLobbyCode]);
 
   const handleCreateLobby = async () => {
-    if (!playerName.trim()) return;
+    const nameValidation = validatePlayerName(playerName);
+    if (!nameValidation.isValid) {
+      setNameError(nameValidation.error || 'Error en el nombre');
+      return;
+    }
 
     setIsCreating(true);
     try {
@@ -24,7 +61,18 @@ export default function HomePage({ game }: HomePageProps) {
   };
 
   const handleJoinLobby = async () => {
-    if (!playerName.trim() || !lobbyCode.trim()) return;
+    const nameValidation = validatePlayerName(playerName);
+    const codeValidation = validateLobbyCode(lobbyCode);
+    
+    if (!nameValidation.isValid) {
+      setNameError(nameValidation.error || 'Error en el nombre');
+      return;
+    }
+    
+    if (!codeValidation.isValid) {
+      setCodeError(codeValidation.error || 'Error en el código');
+      return;
+    }
 
     setIsJoining(true);
     try {
@@ -65,17 +113,20 @@ export default function HomePage({ game }: HomePageProps) {
               type="text"
               value={playerName}
               onChange={(e) => setPlayerName(e.target.value)}
-              className="input"
+              className={`input ${nameError ? 'border-red-500' : ''}`}
               placeholder="Escribe tu nombre..."
               maxLength={50}
             />
+            {nameError && (
+              <p className="text-red-500 text-sm mt-xs">{nameError}</p>
+            )}
           </div>
 
           {/* Crear lobby */}
           <div className="mb-md">
             <button
               onClick={handleCreateLobby}
-              disabled={!playerName.trim() || isCreating || !game.connected}
+              disabled={!playerName.trim() || !!nameError || isCreating || !game.connected}
               className="btn btn-primary btn-mobile"
             >
               {isCreating ? (
@@ -108,10 +159,13 @@ export default function HomePage({ game }: HomePageProps) {
               type="text"
               value={lobbyCode}
               onChange={(e) => setLobbyCode(e.target.value.toUpperCase())}
-              className="input code-input"
+              className={`input code-input ${codeError ? 'border-red-500' : ''}`}
               placeholder="ABC123"
               maxLength={6}
             />
+            {codeError && (
+              <p className="text-red-500 text-sm mt-xs">{codeError}</p>
+            )}
           </div>
 
           <div className="mb-md">
@@ -120,6 +174,8 @@ export default function HomePage({ game }: HomePageProps) {
               disabled={
                 !playerName.trim() ||
                 !lobbyCode.trim() ||
+                !!nameError ||
+                !!codeError ||
                 isJoining ||
                 !game.connected
               }
