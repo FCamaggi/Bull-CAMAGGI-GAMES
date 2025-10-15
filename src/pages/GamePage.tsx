@@ -305,7 +305,9 @@ export default function GamePage({ game }: GamePageProps) {
                             <div className="text-sm font-bold text-red-600 mb-xs">
                               ⚠️ Error:
                             </div>
-                            <p className="text-red-600 text-sm">{validationError}</p>
+                            <p className="text-red-600 text-sm">
+                              {validationError}
+                            </p>
                           </div>
                         )}
 
@@ -313,10 +315,12 @@ export default function GamePage({ game }: GamePageProps) {
                           onClick={() => {
                             const validation = validateAnswer(currentAnswer);
                             if (!validation.isValid) {
-                              setValidationError(validation.error || 'Error de validación');
+                              setValidationError(
+                                validation.error || 'Error de validación'
+                              );
                               return;
                             }
-                            
+
                             socket.emit('submit_answer', {
                               answer: currentAnswer.trim(),
                             });
@@ -364,15 +368,27 @@ export default function GamePage({ game }: GamePageProps) {
                 ) : (
                   <div className="text-center">
                     <h2 className="text-xl font-bold mb-md text-accent">
-                      👀 Observando
+                      👀{' '}
+                      {currentPlayer?.role === 'spectator'
+                        ? 'Público'
+                        : 'Esperando'}
                     </h2>
                     <p className="text-secondary mb-md">
-                      Los jugadores seleccionados están escribiendo sus
-                      respuestas
+                      Los jugadores{' '}
+                      <span className="font-semibold">
+                        {currentRound?.selectedPlayers?.blue?.name}
+                      </span>{' '}
+                      (🔵) y{' '}
+                      <span className="font-semibold">
+                        {currentRound?.selectedPlayers?.red?.name}
+                      </span>{' '}
+                      (🔴) están escribiendo
                     </p>
                     <div className="spinner mx-auto"></div>
                     <p className="text-muted mt-sm text-sm">
-                      Prepárate para votar en la siguiente fase
+                      {currentPlayer?.role === 'spectator'
+                        ? '🗳️ Prepárate para votar en la siguiente fase'
+                        : 'Prepárate para votar en la siguiente fase'}
                     </p>
                   </div>
                 )}

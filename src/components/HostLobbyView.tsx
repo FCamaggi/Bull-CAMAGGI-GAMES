@@ -39,8 +39,19 @@ export default function HostLobbyView({ lobby, socket }: HostLobbyViewProps) {
                   key={index}
                   className="bg-blue-700 rounded-md p-sm flex items-center justify-between"
                 >
-                  <span className="font-medium">{player.name}</span>
-                  {player.isReady && (
+                  <div className="flex items-center gap-2">
+                    <span className="font-medium">{player.name}</span>
+                    {player.role === 'active' ? (
+                      <span className="text-xs bg-yellow-400 text-yellow-900 px-2 py-0.5 rounded-full font-semibold">
+                        ✍️ ACTIVO
+                      </span>
+                    ) : (
+                      <span className="text-xs bg-blue-300 text-blue-900 px-2 py-0.5 rounded-full font-semibold">
+                        👀 PÚBLICO
+                      </span>
+                    )}
+                  </div>
+                  {player.role === 'active' && player.isReady && (
                     <span className="text-green-300">✓ Listo</span>
                   )}
                 </div>
@@ -62,8 +73,19 @@ export default function HostLobbyView({ lobby, socket }: HostLobbyViewProps) {
                   key={index}
                   className="bg-red-700 rounded-md p-sm flex items-center justify-between"
                 >
-                  <span className="font-medium">{player.name}</span>
-                  {player.isReady && (
+                  <div className="flex items-center gap-2">
+                    <span className="font-medium">{player.name}</span>
+                    {player.role === 'active' ? (
+                      <span className="text-xs bg-yellow-400 text-yellow-900 px-2 py-0.5 rounded-full font-semibold">
+                        ✍️ ACTIVO
+                      </span>
+                    ) : (
+                      <span className="text-xs bg-red-300 text-red-900 px-2 py-0.5 rounded-full font-semibold">
+                        👀 PÚBLICO
+                      </span>
+                    )}
+                  </div>
+                  {player.role === 'active' && player.isReady && (
                     <span className="text-green-300">✓ Listo</span>
                   )}
                 </div>

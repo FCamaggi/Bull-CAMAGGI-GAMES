@@ -7,11 +7,11 @@ interface ReconnectScreenProps {
   onCancel: () => void;
 }
 
-export default function ReconnectScreen({ 
+export default function ReconnectScreen({
   lastPlayerName = '',
   lastLobbyCode = '',
   onReconnect,
-  onCancel
+  onCancel,
 }: ReconnectScreenProps) {
   const [playerName, setPlayerName] = useState(lastPlayerName);
   const [lobbyCode, setLobbyCode] = useState(lastLobbyCode);
@@ -44,18 +44,15 @@ export default function ReconnectScreen({
         <h1 className="text-2xl font-bold mb-md text-accent">
           Reconectar al Juego
         </h1>
-        
+
         {isReconnecting ? (
           <div className="space-y-md">
             <div className="spinner mx-auto"></div>
-            <p className="text-secondary">
-              Intentando reconectar...
-            </p>
+            <p className="text-secondary">Intentando reconectar...</p>
             <p className="text-sm text-muted">
-              {lastPlayerName && lastLobbyCode 
+              {lastPlayerName && lastLobbyCode
                 ? `Reconectando como ${lastPlayerName} al lobby ${lastLobbyCode}`
-                : 'Reconectando al juego...'
-              }
+                : 'Reconectando al juego...'}
             </p>
           </div>
         ) : (
@@ -102,10 +99,7 @@ export default function ReconnectScreen({
               >
                 🔄 Reconectar
               </button>
-              <button
-                onClick={onCancel}
-                className="btn btn-secondary w-full"
-              >
+              <button onClick={onCancel} className="btn btn-secondary w-full">
                 ❌ Cancelar
               </button>
             </div>
@@ -114,8 +108,10 @@ export default function ReconnectScreen({
               <div className="mt-md p-sm bg-accent/10 border border-accent/30 rounded text-sm">
                 <p className="font-bold text-accent">💡 Tip:</p>
                 <p className="text-secondary">
-                  Se detectó que estabas jugando como <strong>{lastPlayerName}</strong> en el lobby <strong>{lastLobbyCode}</strong>. 
-                  Si es correcto, solo presiona "Reconectar".
+                  Se detectó que estabas jugando como{' '}
+                  <strong>{lastPlayerName}</strong> en el lobby{' '}
+                  <strong>{lastLobbyCode}</strong>. Si es correcto, solo
+                  presiona "Reconectar".
                 </p>
               </div>
             )}

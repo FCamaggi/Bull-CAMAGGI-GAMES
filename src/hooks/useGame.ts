@@ -1,11 +1,11 @@
 import { useState, useCallback, useEffect, useMemo } from 'react';
 import { useSocket } from './useSocket';
-import { 
-  AppState, 
+import {
+  AppState,
   GameSettings,
   RoundOption,
   RoundResult,
-  ServerToClientEvents
+  ServerToClientEvents,
 } from '../types';
 
 interface GameData {
@@ -21,23 +21,27 @@ const initialAppState: AppState = {
   playerId: undefined,
   playerName: undefined,
   error: undefined,
-  isConnected: false
+  isConnected: false,
 };
 
 const initialGameData: GameData = {
   timeRemaining: 0,
   currentOptions: [],
-  lastResults: null
+  lastResults: null,
 };
 
 // Funciones de persistencia local
-const saveGameState = (playerName: string, lobbyCode: string, playerId: string) => {
+const saveGameState = (
+  playerName: string,
+  lobbyCode: string,
+  playerId: string
+) => {
   try {
     const gameData = {
       playerName,
       lobbyCode,
       playerId,
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
     };
     localStorage.setItem('bull-game-state', JSON.stringify(gameData));
   } catch (error) {
@@ -54,7 +58,7 @@ const loadGameState = () => {
       const timestamp = new Date(data.timestamp);
       const now = new Date();
       const hourAgo = new Date(now.getTime() - 60 * 60 * 1000);
-      
+
       if (timestamp > hourAgo) {
         return data;
       }
@@ -81,7 +85,7 @@ export const useGame = () => {
 
   // Actualizar estado de conexión
   useEffect(() => {
-    setAppState(prev => ({ ...prev, isConnected: connected }));
+    setAppState((prev) => ({ ...prev, isConnected: connected }));
   }, [connected]);
 
   // Configurar listeners cuando hay conexión
@@ -92,7 +96,7 @@ export const useGame = () => {
 
     // Helper para agregar listeners de forma segura
     const addListener = <K extends keyof ServerToClientEvents>(
-      event: K, 
+      event: K,
       handler: ServerToClientEvents[K]
     ) => {
       const unsubscribe = on(event, handler);
@@ -105,12 +109,12 @@ export const useGame = () => {
       if (appState.playerName) {
         saveGameState(appState.playerName, lobby.code, playerId);
       }
-      setAppState(prev => ({
+      setAppState((prev) => ({
         ...prev,
         currentPage: 'lobby',
         lobby,
         playerId,
-        error: undefined
+        error: undefined,
       }));
     });
 
@@ -120,17 +124,17 @@ export const useGame = () => {
       if (appState.playerName) {
         saveGameState(appState.playerName, lobby.code, playerId);
       }
-      setAppState(prev => ({
+      setAppState((prev) => ({
         ...prev,
         currentPage: 'lobby',
         lobby,
         playerId,
-        error: undefined
+        error: undefined,
       }));
     });
 
     addListener('lobby_updated', ({ lobby }) => {
-      setAppState(prev => ({ ...prev, lobby }));
+      setAppState((prev) => ({ ...prev, lobby }));
     });
 
     addListener('player_joined', ({ player }) => {
@@ -142,88 +146,90 @@ export const useGame = () => {
     });
 
     addListener('team_updated', ({ teams }) => {
-      setAppState(prev => ({
+      setAppState((prev) => ({
         ...prev,
-        lobby: prev.lobby ? { ...prev.lobby, teams } : undefined
+        lobby: prev.lobby ? { ...prev.lobby, teams } : undefined,
       }));
     });
 
     addListener('game_started', ({ gameState }) => {
       console.log('Juego iniciado');
-      setAppState(prev => ({
+      setAppState((prev) => ({
         ...prev,
         currentPage: 'game',
-        gameState
+        gameState,
       }));
     });
 
     addListener('game_state_updated', ({ gameState }) => {
-      setAppState(prev => ({ ...prev, gameState }));
+      setAppState((prev) => ({ ...prev, gameState }));
     });
 
     addListener('round_started', ({ round, timeRemaining }) => {
       console.log('Ronda iniciada:', round.number);
-      setGameData(prev => ({ ...prev, timeRemaining }));
+      setGameData((prev) => ({ ...prev, timeRemaining }));
     });
 
     addListener('writing_phase', ({ timeRemaining }) => {
       console.log('Fase de escritura');
-      setGameData(prev => ({ ...prev, timeRemaining }));
+      setGameData((prev) => ({ ...prev, timeRemaining }));
     });
 
     addListener('voting_phase', ({ options, timeRemaining }) => {
       console.log('Fase de votación');
-      setGameData(prev => ({ 
-        ...prev, 
-        currentOptions: options, 
-        timeRemaining 
+      setGameData((prev) => ({
+        ...prev,
+        currentOptions: options,
+        timeRemaining,
       }));
     });
 
     addListener('round_results', ({ results }) => {
       console.log('Resultados de ronda:', results.roundNumber);
-      setGameData(prev => ({ 
-        ...prev, 
-        lastResults: results 
+      setGameData((prev) => ({
+        ...prev,
+        lastResults: results,
       }));
     });
 
     addListener('time_update', ({ timeRemaining }) => {
-      setGameData(prev => ({ ...prev, timeRemaining }));
+      setGameData((prev) => ({ ...prev, timeRemaining }));
     });
 
     addListener('game_finished', ({ winner, finalScores }) => {
       console.log('Juego terminado. Ganador:', winner);
-      setAppState(prev => ({
+      setAppState((prev) => ({
         ...prev,
-        gameState: prev.gameState ? {
-          ...prev.gameState,
-          phase: 'finished',
-          winner,
-          scores: finalScores
-        } : undefined
+        gameState: prev.gameState
+          ? {
+              ...prev.gameState,
+              phase: 'finished',
+              winner,
+              scores: finalScores,
+            }
+          : undefined,
       }));
     });
 
     addListener('error', ({ message, code }) => {
       console.error('Error del servidor:', message, code);
-      setAppState(prev => ({ ...prev, error: message }));
+      setAppState((prev) => ({ ...prev, error: message }));
     });
 
     addListener('validation_error', ({ field, message }) => {
       console.error('Error de validación:', field, message);
-      setAppState(prev => ({ ...prev, error: `${field}: ${message}` }));
+      setAppState((prev) => ({ ...prev, error: `${field}: ${message}` }));
     });
 
     addListener('reconnected', ({ lobby, gameState, playerId }) => {
       console.log('Reconectado exitosamente:', lobby?.code);
-      setAppState(prev => ({
+      setAppState((prev) => ({
         ...prev,
         currentPage: lobby?.gameState ? 'game' : 'lobby',
         lobby,
         gameState,
         playerId: playerId || prev.playerId,
-        error: undefined
+        error: undefined,
       }));
     });
 
@@ -232,7 +238,7 @@ export const useGame = () => {
     });
 
     return () => {
-      unsubscribers.forEach(unsubscribe => unsubscribe());
+      unsubscribers.forEach((unsubscribe) => unsubscribe());
     };
   }, [connected, on]);
 
@@ -250,15 +256,21 @@ export const useGame = () => {
       }
     }, [socket]),
 
-    createLobby: useCallback((playerName: string) => {
-      setAppState(prev => ({ ...prev, playerName }));
-      emit('create_lobby', { playerName });
-    }, [emit]),
+    createLobby: useCallback(
+      (playerName: string) => {
+        setAppState((prev) => ({ ...prev, playerName }));
+        emit('create_lobby', { playerName });
+      },
+      [emit]
+    ),
 
-    joinLobby: useCallback((playerName: string, lobbyCode: string) => {
-      setAppState(prev => ({ ...prev, playerName }));
-      emit('join_lobby', { code: lobbyCode.toUpperCase(), playerName });
-    }, [emit]),
+    joinLobby: useCallback(
+      (playerName: string, lobbyCode: string) => {
+        setAppState((prev) => ({ ...prev, playerName }));
+        emit('join_lobby', { code: lobbyCode.toUpperCase(), playerName });
+      },
+      [emit]
+    ),
 
     leaveLobby: useCallback(() => {
       emit('leave_lobby');
@@ -267,25 +279,37 @@ export const useGame = () => {
       setGameData(initialGameData);
     }, [emit]),
 
-    selectTeam: useCallback((team: 'blue' | 'red') => {
-      emit('select_team', { team });
-    }, [emit]),
+    selectTeam: useCallback(
+      (team: 'blue' | 'red') => {
+        emit('select_team', { team });
+      },
+      [emit]
+    ),
 
     toggleReady: useCallback(() => {
       emit('ready_toggle');
     }, [emit]),
 
-    startGame: useCallback((settings?: Partial<GameSettings>) => {
-      emit('start_game', settings);
-    }, [emit]),
+    startGame: useCallback(
+      (settings?: Partial<GameSettings>) => {
+        emit('start_game', settings);
+      },
+      [emit]
+    ),
 
-    submitAnswer: useCallback((answer: string) => {
-      emit('submit_answer', { answer });
-    }, [emit]),
+    submitAnswer: useCallback(
+      (answer: string) => {
+        emit('submit_answer', { answer });
+      },
+      [emit]
+    ),
 
-    submitVote: useCallback((optionId: string) => {
-      emit('submit_vote', { optionId });
-    }, [emit]),
+    submitVote: useCallback(
+      (optionId: string) => {
+        emit('submit_vote', { optionId });
+      },
+      [emit]
+    ),
 
     nextRound: useCallback(() => {
       emit('next_phase');
@@ -296,17 +320,23 @@ export const useGame = () => {
     }, [emit]),
 
     clearError: useCallback(() => {
-      setAppState(prev => ({ ...prev, error: undefined }));
+      setAppState((prev) => ({ ...prev, error: undefined }));
     }, []),
 
     // Funciones de reconexión
-    reconnectByName: useCallback((playerName: string, lobbyCode: string) => {
-      emit('reconnect_by_name', { playerName, lobbyCode });
-    }, [emit]),
+    reconnectByName: useCallback(
+      (playerName: string, lobbyCode: string) => {
+        emit('reconnect_by_name', { playerName, lobbyCode });
+      },
+      [emit]
+    ),
 
-    reconnectById: useCallback((playerId: string, lobbyCode: string) => {
-      emit('reconnect_attempt', { playerId, lobbyCode });
-    }, [emit]),
+    reconnectById: useCallback(
+      (playerId: string, lobbyCode: string) => {
+        emit('reconnect_attempt', { playerId, lobbyCode });
+      },
+      [emit]
+    ),
 
     // Funciones de estado persistente
     getSavedGameState: useCallback(() => {
@@ -315,18 +345,24 @@ export const useGame = () => {
 
     clearSavedGameState: useCallback(() => {
       clearGameState();
-    }, [])
+    }, []),
   };
 
   // Computed values
   const isHost = appState.lobby?.hostId === appState.playerId;
-  const currentPlayer = appState.lobby?.players.find(p => p.id === appState.playerId);
-  
+  const currentPlayer = appState.lobby?.players.find(
+    (p) => p.id === appState.playerId
+  );
+
   const canStartGame = useMemo(() => {
     if (!appState.lobby || !isHost) return false;
     if (appState.lobby.status !== 'waiting') return false;
-    if (appState.lobby.teams.blue.length === 0 || appState.lobby.teams.red.length === 0) return false;
-    return appState.lobby.players.every(p => p.isReady);
+    if (
+      appState.lobby.teams.blue.length === 0 ||
+      appState.lobby.teams.red.length === 0
+    )
+      return false;
+    return appState.lobby.players.every((p) => p.isReady);
   }, [appState.lobby, isHost]);
 
   const computed = {
@@ -337,7 +373,9 @@ export const useGame = () => {
     currentRound: appState.gameState?.currentRound,
     totalRounds: appState.gameState?.totalRounds,
     scores: appState.gameState?.scores,
-    isGameActive: appState.gameState?.phase && !['waiting', 'finished'].includes(appState.gameState.phase)
+    isGameActive:
+      appState.gameState?.phase &&
+      !['waiting', 'finished'].includes(appState.gameState.phase),
   };
 
   return {
@@ -347,8 +385,8 @@ export const useGame = () => {
     ...computed,
     isConnected: connected,
     connectionError: socketError,
-    
+
     // Actions
-    ...actions
+    ...actions,
   };
 };

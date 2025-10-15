@@ -91,23 +91,41 @@ export default function LobbyPage({ game }: LobbyPageProps) {
                       : 'border-border'
                   }`}
                 >
-                  <div className="flex items-center justify-between">
-                    <span className="font-medium">
-                      {player.name}
-                      {player.isHost && ' 👑'}
-                      {player.id === playerId && ' (TÚ)'}
-                    </span>
-                    <div className="flex items-center gap-sm">
-                      <span className="text-sm text-muted">
-                        {player.score} pts
-                      </span>
-                      {player.isReady && (
-                        <span className="text-success">✓</span>
-                      )}
-                      {!player.isConnected && (
-                        <span className="text-error">⚠️</span>
-                      )}
+                  <div className="flex flex-col gap-1">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <span className="font-medium">
+                          {player.name}
+                          {player.isHost && ' 👑'}
+                          {player.id === playerId && ' (TÚ)'}
+                        </span>
+                        {player.role === 'active' ? (
+                          <span className="text-xs bg-yellow-400 text-yellow-900 px-2 py-0.5 rounded-full font-semibold">
+                            ✍️ ACTIVO
+                          </span>
+                        ) : (
+                          <span className="text-xs bg-gray-300 text-gray-700 px-2 py-0.5 rounded-full font-semibold">
+                            👀 PÚBLICO
+                          </span>
+                        )}
+                      </div>
+                      <div className="flex items-center gap-sm">
+                        <span className="text-sm text-muted">
+                          {player.score} pts
+                        </span>
+                        {player.role === 'active' && player.isReady && (
+                          <span className="text-success">✓</span>
+                        )}
+                        {!player.isConnected && (
+                          <span className="text-error">⚠️</span>
+                        )}
+                      </div>
                     </div>
+                    {player.role === 'spectator' && (
+                      <span className="text-xs text-muted">
+                        Solo vota, no escribe respuestas
+                      </span>
+                    )}
                   </div>
                 </div>
               ))}
@@ -147,23 +165,41 @@ export default function LobbyPage({ game }: LobbyPageProps) {
                       : 'border-border'
                   }`}
                 >
-                  <div className="flex items-center justify-between">
-                    <span className="font-medium">
-                      {player.name}
-                      {player.isHost && ' 👑'}
-                      {player.id === playerId && ' (TÚ)'}
-                    </span>
-                    <div className="flex items-center gap-sm">
-                      <span className="text-sm text-muted">
-                        {player.score} pts
-                      </span>
-                      {player.isReady && (
-                        <span className="text-success">✓</span>
-                      )}
-                      {!player.isConnected && (
-                        <span className="text-error">⚠️</span>
-                      )}
+                  <div className="flex flex-col gap-1">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <span className="font-medium">
+                          {player.name}
+                          {player.isHost && ' 👑'}
+                          {player.id === playerId && ' (TÚ)'}
+                        </span>
+                        {player.role === 'active' ? (
+                          <span className="text-xs bg-yellow-400 text-yellow-900 px-2 py-0.5 rounded-full font-semibold">
+                            ✍️ ACTIVO
+                          </span>
+                        ) : (
+                          <span className="text-xs bg-gray-300 text-gray-700 px-2 py-0.5 rounded-full font-semibold">
+                            👀 PÚBLICO
+                          </span>
+                        )}
+                      </div>
+                      <div className="flex items-center gap-sm">
+                        <span className="text-sm text-muted">
+                          {player.score} pts
+                        </span>
+                        {player.role === 'active' && player.isReady && (
+                          <span className="text-success">✓</span>
+                        )}
+                        {!player.isConnected && (
+                          <span className="text-error">⚠️</span>
+                        )}
+                      </div>
                     </div>
+                    {player.role === 'spectator' && (
+                      <span className="text-xs text-muted">
+                        Solo vota, no escribe respuestas
+                      </span>
+                    )}
                   </div>
                 </div>
               ))}
@@ -189,9 +225,20 @@ export default function LobbyPage({ game }: LobbyPageProps) {
 
         {/* Controles */}
         <div className="card">
+          {/* Mensaje para espectadores */}
+          {currentPlayer?.team && currentPlayer.role === 'spectator' && (
+            <div className="mb-md p-md bg-blue-50 border border-blue-200 rounded-lg">
+              <p className="text-sm text-blue-800">
+                👀 <strong>Eres parte del público:</strong> Votarás en cada
+                ronda pero no escribirás respuestas. Los primeros 2 jugadores de
+                cada equipo son jugadores activos.
+              </p>
+            </div>
+          )}
+
           <div className="flex flex-col md:flex-row gap-md items-center">
-            {/* Ready toggle */}
-            {currentPlayer?.team && (
+            {/* Ready toggle - solo para jugadores activos */}
+            {currentPlayer?.team && currentPlayer.role === 'active' && (
               <button
                 onClick={handleToggleReady}
                 className={`btn ${
@@ -202,6 +249,15 @@ export default function LobbyPage({ game }: LobbyPageProps) {
               </button>
             )}
 
+            {/* Mensaje para espectadores */}
+            {currentPlayer?.team && currentPlayer.role === 'spectator' && (
+              <div className="flex-1 text-center p-md bg-gray-100 rounded-lg">
+                <p className="text-sm text-gray-700">
+                  ✅ Listo para jugar (el público no necesita marcar ready)
+                </p>
+              </div>
+            )}
+
             {/* Start game (solo host) */}
             {isHost && (
               <button
@@ -209,7 +265,9 @@ export default function LobbyPage({ game }: LobbyPageProps) {
                 disabled={!canStartGame}
                 className="btn btn-primary flex-1"
               >
-                {canStartGame ? '🎮 Iniciar Juego' : 'Esperando jugadores...'}
+                {canStartGame
+                  ? '🎮 Iniciar Juego'
+                  : 'Esperando jugadores activos...'}
               </button>
             )}
           </div>

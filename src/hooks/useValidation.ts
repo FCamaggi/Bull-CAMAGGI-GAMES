@@ -11,7 +11,10 @@ export interface ValidationResult {
 }
 
 export interface AnswerValidation {
-  validateAnswer: (answer: string, currentRound?: BullRound) => ValidationResult;
+  validateAnswer: (
+    answer: string,
+    currentRound?: BullRound
+  ) => ValidationResult;
   validatePlayerName: (name: string) => ValidationResult;
   validateLobbyCode: (code: string) => ValidationResult;
 }
@@ -28,7 +31,7 @@ export function useValidation(): AnswerValidation {
       if (trimmedAnswer.length === 0) {
         return {
           isValid: false,
-          error: 'La respuesta no puede estar vacía'
+          error: 'La respuesta no puede estar vacía',
         };
       }
 
@@ -36,7 +39,7 @@ export function useValidation(): AnswerValidation {
       if (trimmedAnswer.length < MIN_ANSWER_LENGTH) {
         return {
           isValid: false,
-          error: `La respuesta debe tener al menos ${MIN_ANSWER_LENGTH} caracter`
+          error: `La respuesta debe tener al menos ${MIN_ANSWER_LENGTH} caracter`,
         };
       }
 
@@ -44,7 +47,7 @@ export function useValidation(): AnswerValidation {
       if (trimmedAnswer.length > MAX_ANSWER_LENGTH) {
         return {
           isValid: false,
-          error: `La respuesta no puede tener más de ${MAX_ANSWER_LENGTH} caracteres`
+          error: `La respuesta no puede tener más de ${MAX_ANSWER_LENGTH} caracteres`,
         };
       }
 
@@ -57,14 +60,15 @@ export function useValidation(): AnswerValidation {
         if (userAnswer === correctAnswer) {
           return {
             isValid: false,
-            error: 'Tu respuesta no puede ser igual a la respuesta correcta'
+            error: 'Tu respuesta no puede ser igual a la respuesta correcta',
           };
         }
 
         if (userAnswer === incorrectAnswer) {
           return {
             isValid: false,
-            error: 'Tu respuesta no puede ser igual a la respuesta incorrecta predefinida'
+            error:
+              'Tu respuesta no puede ser igual a la respuesta incorrecta predefinida',
           };
         }
       }
@@ -80,14 +84,14 @@ export function useValidation(): AnswerValidation {
       if (trimmedName.length === 0) {
         return {
           isValid: false,
-          error: 'El nombre es obligatorio'
+          error: 'El nombre es obligatorio',
         };
       }
 
       if (trimmedName.length > 50) {
         return {
           isValid: false,
-          error: 'El nombre no puede tener más de 50 caracteres'
+          error: 'El nombre no puede tener más de 50 caracteres',
         };
       }
 
@@ -96,7 +100,8 @@ export function useValidation(): AnswerValidation {
       if (!validPattern.test(trimmedName)) {
         return {
           isValid: false,
-          error: 'El nombre solo puede contener letras, números, espacios, guiones y guiones bajos'
+          error:
+            'El nombre solo puede contener letras, números, espacios, guiones y guiones bajos',
         };
       }
 
@@ -111,14 +116,14 @@ export function useValidation(): AnswerValidation {
       if (trimmedCode.length === 0) {
         return {
           isValid: false,
-          error: 'El código del lobby es obligatorio'
+          error: 'El código del lobby es obligatorio',
         };
       }
 
       if (trimmedCode.length !== 6) {
         return {
           isValid: false,
-          error: 'El código debe tener exactamente 6 caracteres'
+          error: 'El código debe tener exactamente 6 caracteres',
         };
       }
 
@@ -127,7 +132,7 @@ export function useValidation(): AnswerValidation {
       if (!validPattern.test(trimmedCode)) {
         return {
           isValid: false,
-          error: 'El código solo puede contener letras mayúsculas y números'
+          error: 'El código solo puede contener letras mayúsculas y números',
         };
       }
 
@@ -138,7 +143,7 @@ export function useValidation(): AnswerValidation {
   return {
     validateAnswer,
     validatePlayerName,
-    validateLobbyCode
+    validateLobbyCode,
   };
 }
 

@@ -28,7 +28,12 @@ export default function App() {
         setShowReconnectScreen(true);
       }
     }
-  }, [game.isConnected, game.lobby, showReconnectScreen, game.getSavedGameState]);
+  }, [
+    game.isConnected,
+    game.lobby,
+    showReconnectScreen,
+    game.getSavedGameState,
+  ]);
 
   // Manejar reconexión
   const handleReconnect = (playerName: string, lobbyCode: string) => {
@@ -81,9 +86,7 @@ export default function App() {
             <h1 className="text-2xl font-bold mb-md text-red-500">
               Error de Conexión
             </h1>
-            <p className="text-secondary mb-lg">
-              {game.error}
-            </p>
+            <p className="text-secondary mb-lg">{game.error}</p>
             <button
               onClick={() => {
                 game.clearError();
@@ -104,18 +107,14 @@ export default function App() {
     if (game.currentPage === 'game' && game.gameState) {
       return <GamePage game={game} />;
     }
-    
+
     if (game.currentPage === 'lobby' && game.lobby) {
       return <LobbyPage game={game} />;
     }
-    
+
     // Por defecto, mostrar la página de inicio
     return <HomePage game={game} />;
   };
 
-  return (
-    <ErrorBoundary>
-      {renderCurrentPage()}
-    </ErrorBoundary>
-  );
+  return <ErrorBoundary>{renderCurrentPage()}</ErrorBoundary>;
 }

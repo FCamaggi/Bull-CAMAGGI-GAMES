@@ -63,12 +63,12 @@ export default function HomePage({ game }: HomePageProps) {
   const handleJoinLobby = async () => {
     const nameValidation = validatePlayerName(playerName);
     const codeValidation = validateLobbyCode(lobbyCode);
-    
+
     if (!nameValidation.isValid) {
       setNameError(nameValidation.error || 'Error en el nombre');
       return;
     }
-    
+
     if (!codeValidation.isValid) {
       setCodeError(codeValidation.error || 'Error en el código');
       return;
@@ -126,7 +126,12 @@ export default function HomePage({ game }: HomePageProps) {
           <div className="mb-md">
             <button
               onClick={handleCreateLobby}
-              disabled={!playerName.trim() || !!nameError || isCreating || !game.connected}
+              disabled={
+                !playerName.trim() ||
+                !!nameError ||
+                isCreating ||
+                !game.connected
+              }
               className="btn btn-primary btn-mobile"
             >
               {isCreating ? (
@@ -159,7 +164,9 @@ export default function HomePage({ game }: HomePageProps) {
               type="text"
               value={lobbyCode}
               onChange={(e) => setLobbyCode(e.target.value.toUpperCase())}
-              className={`input code-input ${codeError ? 'border-red-500' : ''}`}
+              className={`input code-input ${
+                codeError ? 'border-red-500' : ''
+              }`}
               placeholder="ABC123"
               maxLength={6}
             />
