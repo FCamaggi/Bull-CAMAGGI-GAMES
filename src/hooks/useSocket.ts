@@ -20,7 +20,8 @@ interface SocketState {
  */
 export function useSocket(options: UseSocketOptions = {}) {
   // Usar variable de entorno para la URL del backend
-  const backendUrl = import.meta.env.VITE_BACKEND_URL || 'http://localhost:3001';
+  const backendUrl =
+    import.meta.env.VITE_BACKEND_URL || 'http://localhost:3001';
   const { url = backendUrl, autoConnect = true } = options;
 
   console.log('🔌 Configuración de Socket:', {
