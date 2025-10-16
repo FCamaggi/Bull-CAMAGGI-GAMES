@@ -14,9 +14,10 @@ export default function TestConnection() {
   };
 
   useEffect(() => {
-    addLog('Iniciando conexión...');
+  const backendUrl = (import.meta && import.meta.env && import.meta.env.VITE_BACKEND_URL) ? (import.meta.env.VITE_BACKEND_URL as string) : 'http://localhost:3001';
+  addLog('Iniciando conexión...');
 
-    const newSocket = io('http://localhost:3001', {
+      const newSocket = io(backendUrl, {
       transports: ['websocket', 'polling'],
     });
 

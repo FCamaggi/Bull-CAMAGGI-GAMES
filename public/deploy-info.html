@@ -121,12 +121,21 @@
       </ul>
     </div>
 
-    <script>
-      // Esta información se inyecta en tiempo de build
+    <script type="module">
+      // Intentamos leer import.meta.env en un módulo. Si el HTML se sirve como
+      // estático y no fue procesado por Vite, import.meta.env puede estar vacío;
+      // usamos try/catch para evitar excepciones de parsing.
+      let env = {};
+      try {
+        env = import.meta.env || {};
+      } catch (e) {
+        env = {};
+      }
+
       const buildInfo = {
-          mode: import.meta.env.MODE,
-          backendUrl: import.meta.env.VITE_BACKEND_URL || 'NOT_SET',
-          timestamp: new Date().toISOString()
+        mode: env.MODE || '-',
+        backendUrl: env.VITE_BACKEND_URL || 'NOT_SET',
+        timestamp: new Date().toISOString(),
       };
 
       document.getElementById('mode').textContent = buildInfo.mode;
