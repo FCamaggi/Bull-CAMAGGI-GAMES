@@ -1,6 +1,7 @@
 import { useEffect, useState, useCallback, useRef } from 'react';
 import { io, Socket } from 'socket.io-client';
 import { ClientToServerEvents, ServerToClientEvents } from '../types';
+import { getBackendUrl, getBackendUrlSync } from '../utils/runtimeConfig';
 
 type SocketType = Socket<ServerToClientEvents, ClientToServerEvents>;
 
@@ -19,16 +20,34 @@ interface SocketState {
  * Hook personalizado para manejar conexiones Socket.io
  */
 export function useSocket(options: UseSocketOptions = {}) {
-  // Usar variable de entorno para la URL del backend
-  const backendUrl =
-    import.meta.env.VITE_BACKEND_URL || 'http://localhost:3001';
-  const { url = backendUrl, autoConnect = true } = options;
+  // Intentar usar runtime config, con fallback a import.meta.env
+  const defaultBackendUrl = getBackendUrlSync();
+  const { url = defaultBackendUrl, autoConnect = true } = options;
+
+  const [backendUrl, setBackendUrl] = useState(url);
+  const [configLoaded, setConfigLoaded] = useState(false);
+
+  // Cargar runtime config al montar
+  useEffect(() => {
+    getBackendUrl()
+      .then((runtimeUrl) => {
+        if (runtimeUrl !== backendUrl) {
+          console.log('🔄 Actualizando backend URL desde runtime-config:', runtimeUrl);
+          setBackendUrl(runtimeUrl);
+        }
+      })
+      .finally(() => {
+        setConfigLoaded(true);
+      });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   console.log('🔌 Configuración de Socket:', {
     VITE_BACKEND_URL: import.meta.env.VITE_BACKEND_URL,
     backendUrl,
-    url,
+    url: backendUrl,
     mode: import.meta.env.MODE,
+    configLoaded,
   });
 
   const [state, setState] = useState<SocketState>({
@@ -38,14 +57,15 @@ export function useSocket(options: UseSocketOptions = {}) {
   });
 
   const socketRef = useRef<SocketType | null>(null);
+  const connectAttemptedRef = useRef(false);
 
   const connect = useCallback(() => {
     if (socketRef.current?.connected) return;
 
-    console.log('🔌 Intentando conectar a:', url);
+    console.log('🔌 Intentando conectar a:', backendUrl);
 
     try {
-      const socket = io(url, {
+      const socket = io(backendUrl, {
         autoConnect: false,
         transports: ['websocket', 'polling'],
         timeout: 10000,
@@ -83,7 +103,7 @@ export function useSocket(options: UseSocketOptions = {}) {
         error: `Error creando conexión: ${error}`,
       }));
     }
-  }, [url]);
+  }, [backendUrl]);
 
   const disconnect = useCallback(() => {
     if (socketRef.current) {
@@ -98,9 +118,10 @@ export function useSocket(options: UseSocketOptions = {}) {
     setTimeout(connect, 1000);
   }, [connect, disconnect]);
 
-  // Auto-conectar si está habilitado
+  // Auto-conectar si está habilitado, pero solo después de cargar config
   useEffect(() => {
-    if (autoConnect) {
+    if (autoConnect && configLoaded && !connectAttemptedRef.current) {
+      connectAttemptedRef.current = true;
       connect();
     }
 
@@ -109,7 +130,7 @@ export function useSocket(options: UseSocketOptions = {}) {
         socketRef.current.disconnect();
       }
     };
-  }, [autoConnect, connect]);
+  }, [autoConnect, configLoaded, connect]);
 
   // Métodos para emitir eventos comunes
   const emit = useCallback(
