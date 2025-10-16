@@ -35,6 +35,12 @@ export default function LobbyPage({ game }: LobbyPageProps) {
   const blueTeam = lobby.teams.blue || [];
   const redTeam = lobby.teams.red || [];
 
+  // Calcular espacios disponibles para jugadores activos
+  const blueActiveCount = blueTeam.filter((p: any) => p.role === 'active').length;
+  const redActiveCount = redTeam.filter((p: any) => p.role === 'active').length;
+  const blueActiveSlotsAvailable = 2 - blueActiveCount;
+  const redActiveSlotsAvailable = 2 - redActiveCount;
+
   return (
     <div className="min-h-screen bg-primary py-lg">
       <div className="container">
@@ -74,11 +80,30 @@ export default function LobbyPage({ game }: LobbyPageProps) {
 
         {/* Selección de equipos */}
         <div className="grid md:grid-cols-2 gap-lg mb-lg">
+          {/* Información sobre roles */}
+          {!currentPlayer?.team && !isHost && (
+            <div className="md:col-span-2 card bg-blue-50 border border-blue-200">
+              <div className="text-sm text-blue-900">
+                <p className="font-semibold mb-2">ℹ️ Cómo funcionan los roles:</p>
+                <ul className="space-y-1 list-disc list-inside">
+                  <li><strong>Jugadores Activos (✍️):</strong> Los primeros 2 de cada equipo. Escriben respuestas falsas en cada ronda.</li>
+                  <li><strong>Público (👀):</strong> Jugadores 3+ de cada equipo. Solo votan, no escriben respuestas.</li>
+                  <li><strong>Host (👑):</strong> Controla el juego pero no juega.</li>
+                </ul>
+              </div>
+            </div>
+          )}
+
           {/* Equipo Azul */}
           <div className="card">
             <div className="flex items-center justify-between mb-md">
               <h2 className="text-xl font-bold text-blue">🔵 Equipo Azul</h2>
-              <span className="text-sm text-muted">{blueTeam.length}/4</span>
+              <div className="text-right">
+                <div className="text-sm text-muted">{blueTeam.length} jugadores</div>
+                <div className="text-xs text-muted">
+                  {blueActiveCount}/2 activos • {blueTeam.length - blueActiveCount} público
+                </div>
+              </div>
             </div>
 
             <div className="space-y-sm mb-md">
@@ -139,12 +164,19 @@ export default function LobbyPage({ game }: LobbyPageProps) {
 
             <button
               onClick={() => handleSelectTeam('blue')}
-              disabled={blueTeam.length >= 4 || currentPlayer?.team === 'blue'}
+              disabled={
+                isHost || 
+                currentPlayer?.team === 'blue'
+              }
               className="btn btn-blue w-full"
             >
-              {currentPlayer?.team === 'blue'
-                ? 'En Equipo Azul'
-                : 'Unirse al Azul'}
+              {isHost 
+                ? '👑 El Host no juega'
+                : currentPlayer?.team === 'blue'
+                ? `${currentPlayer.role === 'active' ? '✍️ ' : '👀 '}En Equipo Azul`
+                : blueActiveSlotsAvailable > 0 
+                ? `Unirse como Activo (${blueActiveSlotsAvailable} lugares)`
+                : 'Unirse como Público'}
             </button>
           </div>
 
@@ -152,7 +184,12 @@ export default function LobbyPage({ game }: LobbyPageProps) {
           <div className="card">
             <div className="flex items-center justify-between mb-md">
               <h2 className="text-xl font-bold text-red">🔴 Equipo Rojo</h2>
-              <span className="text-sm text-muted">{redTeam.length}/4</span>
+              <div className="text-right">
+                <div className="text-sm text-muted">{redTeam.length} jugadores</div>
+                <div className="text-xs text-muted">
+                  {redActiveCount}/2 activos • {redTeam.length - redActiveCount} público
+                </div>
+              </div>
             </div>
 
             <div className="space-y-sm mb-md">
@@ -213,12 +250,19 @@ export default function LobbyPage({ game }: LobbyPageProps) {
 
             <button
               onClick={() => handleSelectTeam('red')}
-              disabled={redTeam.length >= 4 || currentPlayer?.team === 'red'}
+              disabled={
+                isHost || 
+                currentPlayer?.team === 'red'
+              }
               className="btn btn-red w-full"
             >
-              {currentPlayer?.team === 'red'
-                ? 'En Equipo Rojo'
-                : 'Unirse al Rojo'}
+              {isHost 
+                ? '👑 El Host no juega'
+                : currentPlayer?.team === 'red'
+                ? `${currentPlayer.role === 'active' ? '✍️ ' : '👀 '}En Equipo Rojo`
+                : redActiveSlotsAvailable > 0 
+                ? `Unirse como Activo (${redActiveSlotsAvailable} lugares)`
+                : 'Unirse como Público'}
             </button>
           </div>
         </div>
