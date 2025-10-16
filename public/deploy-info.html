@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bull Game - Configuración de Deploy</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            background: #1a1a1a;
+            color: #fff;
+        }
+        h1 { color: #4CAF50; }
+        .section {
+            background: #2a2a2a;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+            border-left: 4px solid #4CAF50;
+        }
+        code {
+            background: #1a1a1a;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-family: 'Courier New', monospace;
+        }
+        .env-value {
+            color: #ffeb3b;
+            font-weight: bold;
+        }
+        .warning {
+            background: #ff9800;
+            color: #000;
+            padding: 10px;
+            border-radius: 4px;
+            margin: 10px 0;
+        }
+        .success {
+            background: #4CAF50;
+            color: #fff;
+            padding: 10px;
+            border-radius: 4px;
+            margin: 10px 0;
+        }
+    </style>
+</head>
+<body>
+    <h1>🎮 Bull Game - Información de Deploy</h1>
+    
+    <div class="section">
+        <h2>📦 Build Info</h2>
+        <p><strong>Modo:</strong> <span id="mode" class="env-value">-</span></p>
+        <p><strong>Backend URL (Build Time):</strong> <span id="backend-url" class="env-value">-</span></p>
+        <p><strong>Timestamp:</strong> <span id="timestamp" class="env-value">-</span></p>
+    </div>
+
+    <div class="section">
+        <h2>🔧 Netlify Configuration Required</h2>
+        <p>Para que el frontend se conecte correctamente al backend, debes configurar:</p>
+        <ol>
+            <li>Ve a <strong>Netlify Dashboard</strong></li>
+            <li>Site settings → Environment variables</li>
+            <li>Agrega esta variable:</li>
+        </ol>
+        <code>VITE_BACKEND_URL = https://bull-game-backend.onrender.com</code>
+        
+        <div class="warning">
+            ⚠️ <strong>Importante:</strong> Después de agregar la variable, debes hacer un <strong>Clear cache and deploy site</strong>
+        </div>
+    </div>
+
+    <div class="section">
+        <h2>✅ Verificación</h2>
+        <p>Una vez configurado, verifica:</p>
+        <ul>
+            <li>Abre la consola del navegador (F12)</li>
+            <li>Busca el mensaje: <code>🔌 Configuración de Socket:</code></li>
+            <li>Verifica que <code>url</code> sea: <code>https://bull-game-backend.onrender.com</code></li>
+            <li>Debe aparecer: <code>✅ Conectado al servidor</code></li>
+        </ul>
+    </div>
+
+    <div class="section">
+        <h2>🐛 Troubleshooting</h2>
+        <p><strong>Si ves "http://localhost:3001":</strong></p>
+        <ul>
+            <li>La variable de entorno NO está configurada en Netlify</li>
+            <li>Configúrala y haz rebuild</li>
+        </ul>
+        
+        <p><strong>Si ves "transport close":</strong></p>
+        <ul>
+            <li>El backend puede estar dormido (Render Free Tier)</li>
+            <li>Espera 30-60 segundos y refresca</li>
+            <li>Verifica que el backend esté corriendo: <a href="https://bull-game-backend.onrender.com/health" target="_blank">Backend Health Check</a></li>
+        </ul>
+    </div>
+
+    <script>
+        // Esta información se inyecta en tiempo de build
+        const buildInfo = {
+            mode: import.meta.env.MODE,
+            backendUrl: import.meta.env.VITE_BACKEND_URL || 'NOT_SET',
+            timestamp: new Date().toISOString()
+        };
+
+        document.getElementById('mode').textContent = buildInfo.mode;
+        document.getElementById('backend-url').textContent = buildInfo.backendUrl;
+        document.getElementById('timestamp').textContent = buildInfo.timestamp;
+
+        console.log('📦 Build Info:', buildInfo);
+    </script>
+</body>
+</html>

@@ -19,7 +19,16 @@ interface SocketState {
  * Hook personalizado para manejar conexiones Socket.io
  */
 export function useSocket(options: UseSocketOptions = {}) {
-  const { url = 'http://localhost:3001', autoConnect = true } = options;
+  // Usar variable de entorno para la URL del backend
+  const backendUrl = import.meta.env.VITE_BACKEND_URL || 'http://localhost:3001';
+  const { url = backendUrl, autoConnect = true } = options;
+
+  console.log('🔌 Configuración de Socket:', {
+    VITE_BACKEND_URL: import.meta.env.VITE_BACKEND_URL,
+    backendUrl,
+    url,
+    mode: import.meta.env.MODE,
+  });
 
   const [state, setState] = useState<SocketState>({
     socket: null,
@@ -31,6 +40,8 @@ export function useSocket(options: UseSocketOptions = {}) {
 
   const connect = useCallback(() => {
     if (socketRef.current?.connected) return;
+
+    console.log('🔌 Intentando conectar a:', url);
 
     try {
       const socket = io(url, {
