@@ -122,27 +122,35 @@
     </div>
 
     <script type="module">
-      // Intentamos leer import.meta.env en un módulo. Si el HTML se sirve como
-      // estático y no fue procesado por Vite, import.meta.env puede estar vacío;
-      // usamos try/catch para evitar excepciones de parsing.
-      let env = {};
-      try {
-        env = import.meta.env || {};
-      } catch (e) {
-        env = {};
+      // Leer la configuración desde runtime-config.json generado durante el build
+      async function loadConfig() {
+        try {
+          const response = await fetch('/runtime-config.json');
+          if (!response.ok) {
+            throw new Error(`HTTP ${response.status}`);
+          }
+          const config = await response.json();
+
+          const buildInfo = {
+            mode: config.MODE || '-',
+            backendUrl: config.VITE_BACKEND_URL || 'NOT_SET',
+            timestamp: config.BUILD_TIME || new Date().toISOString(),
+          };
+
+          document.getElementById('mode').textContent = buildInfo.mode;
+          document.getElementById('backend-url').textContent = buildInfo.backendUrl;
+          document.getElementById('timestamp').textContent = buildInfo.timestamp;
+
+          console.log('📦 Build Info:', buildInfo);
+        } catch (error) {
+          console.error('❌ Error cargando runtime-config.json:', error);
+          document.getElementById('mode').textContent = 'ERROR';
+          document.getElementById('backend-url').textContent = 'Error cargando config';
+          document.getElementById('timestamp').textContent = '-';
+        }
       }
 
-      const buildInfo = {
-        mode: env.MODE || '-',
-        backendUrl: env.VITE_BACKEND_URL || 'NOT_SET',
-        timestamp: new Date().toISOString(),
-      };
-
-      document.getElementById('mode').textContent = buildInfo.mode;
-      document.getElementById('backend-url').textContent = buildInfo.backendUrl;
-      document.getElementById('timestamp').textContent = buildInfo.timestamp;
-
-      console.log('📦 Build Info:', buildInfo);
+      loadConfig();
     </script>
   </body>
 </html>
