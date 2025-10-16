@@ -130,7 +130,7 @@ export default function HomePage({ game }: HomePageProps) {
                 !playerName.trim() ||
                 !!nameError ||
                 isCreating ||
-                !game.connected
+                !game.isConnected
               }
               className="btn btn-primary btn-mobile"
             >
@@ -184,7 +184,7 @@ export default function HomePage({ game }: HomePageProps) {
                 !!nameError ||
                 !!codeError ||
                 isJoining ||
-                !game.connected
+                !game.isConnected
               }
               className="btn btn-blue btn-mobile"
             >
@@ -203,7 +203,7 @@ export default function HomePage({ game }: HomePageProps) {
           </div>
 
           {/* Estado de conexión */}
-          {!game.connected && (
+          {!game.isConnected && (
             <div className="text-center p-sm bg-warning bg-opacity-10 rounded-lg border border-warning">
               <span className="text-warning text-sm font-medium">
                 ⚠️ Conectando al servidor...

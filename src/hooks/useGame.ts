@@ -85,6 +85,7 @@ export const useGame = () => {
 
   // Actualizar estado de conexión
   useEffect(() => {
+    console.log('🔄 useGame: Actualizando isConnected:', connected);
     setAppState((prev) => ({ ...prev, isConnected: connected }));
   }, [connected]);
 
