@@ -17,7 +17,8 @@ export default function App() {
     if (savedGame && !game.lobby) {
       setShowReconnectScreen(true);
     }
-  }, [game.lobby, game.getSavedGameState]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [game.lobby]); // Removido game.getSavedGameState de las dependencias
 
   // Detectar desconexiones para mostrar la pantalla de reconexión
   useEffect(() => {
@@ -32,7 +33,7 @@ export default function App() {
     game.isConnected,
     game.lobby,
     showReconnectScreen,
-    game.getSavedGameState,
+    game.getSavedGameState, // Mantener aquí pero será memoizada en useGame
   ]);
 
   // Manejar reconexión

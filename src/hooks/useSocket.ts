@@ -42,13 +42,16 @@ export function useSocket(options: UseSocketOptions = {}) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  console.log('🔌 Configuración de Socket:', {
-    VITE_BACKEND_URL: import.meta.env.VITE_BACKEND_URL,
-    backendUrl,
-    url: backendUrl,
-    mode: import.meta.env.MODE,
-    configLoaded,
-  });
+  // Log de configuración solo cuando cambia algo relevante
+  useEffect(() => {
+    console.log('🔌 Configuración de Socket:', {
+      VITE_BACKEND_URL: import.meta.env.VITE_BACKEND_URL,
+      backendUrl,
+      url: backendUrl,
+      mode: import.meta.env.MODE,
+      configLoaded,
+    });
+  }, [backendUrl, configLoaded]); // Solo log cuando estos cambien
 
   const [state, setState] = useState<SocketState>({
     socket: null,
