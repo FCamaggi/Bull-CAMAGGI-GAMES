@@ -144,45 +144,65 @@ export function useSocket(options: UseSocketOptions = {}) {
       event: K,
       ...args: Parameters<ClientToServerEvents[K]>
     ) => {
-      if (!state.socket || !state.connected) {
-        console.warn(`Intentando emitir ${event} pero no hay conexión`);
+      const socket = socketRef.current;
+      
+      console.log('🔥 emit llamado:', {
+        event,
+        hasSocket: !!socket,
+        isConnected: socket?.connected,
+        args
+      });
+      
+      if (!socket || !socket.connected) {
+        console.error(`❌ Intentando emitir ${event} pero no hay conexión`, {
+          hasSocket: !!socket,
+          isConnected: socket?.connected
+        });
         return;
       }
 
-      state.socket.emit(event, ...args);
+      console.log('✅ Emitiendo evento:', event, args);
+      socket.emit(event, ...args);
     },
-    [state.socket, state.connected]
+    []
   );
 
   const on = useCallback(
     (event: string, listener: any) => {
-      if (!state.socket) return;
+      const socket = socketRef.current;
+      if (!socket) {
+        console.warn('No hay socket para agregar listener:', event);
+        return;
+      }
 
-      state.socket.on(event as any, listener);
+      socket.on(event as any, listener);
 
       // Retornar función para remover listener
       return () => {
-        state.socket?.off(event as any, listener);
+        socketRef.current?.off(event as any, listener);
       };
     },
-    [state.socket]
+    []
   );
 
   const off = useCallback(
     (event: string, listener?: any) => {
-      if (!state.socket) return;
+      const socket = socketRef.current;
+      if (!socket) return;
 
       if (listener) {
-        state.socket.off(event as any, listener);
+        socket.off(event as any, listener);
       } else {
-        state.socket.off(event as any);
+        socket.off(event as any);
       }
     },
-    [state.socket]
+    []
   );
 
   return {
-    ...state,
+    socket: socketRef.current,
+    connected: socketRef.current?.connected || false,
+    error: state.error,
     connect,
     disconnect,
     reconnect,
