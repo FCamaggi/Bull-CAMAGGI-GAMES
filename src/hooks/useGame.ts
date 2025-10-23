@@ -358,12 +358,17 @@ export const useGame = () => {
   const canStartGame = useMemo(() => {
     if (!appState.lobby || !isHost) return false;
     if (appState.lobby.status !== 'waiting') return false;
-    if (
-      appState.lobby.teams.blue.length === 0 ||
-      appState.lobby.teams.red.length === 0
-    )
-      return false;
-    return appState.lobby.players.every((p) => p.isReady);
+    
+    // Verificar que ambos equipos tengan al menos un jugador activo
+    const blueActive = appState.lobby.teams.blue.filter((p) => p.role === 'active');
+    const redActive = appState.lobby.teams.red.filter((p) => p.role === 'active');
+    
+    if (blueActive.length === 0 || redActive.length === 0) return false;
+    
+    // Verificar que todos los jugadores ACTIVOS estén listos
+    // Los espectadores no necesitan marcar ready
+    const activePlayers = appState.lobby.players.filter((p) => p.role === 'active');
+    return activePlayers.every((p) => p.isReady);
   }, [appState.lobby, isHost]);
 
   const computed = {

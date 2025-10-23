@@ -32,7 +32,10 @@ export function useSocket(options: UseSocketOptions = {}) {
     getBackendUrl()
       .then((runtimeUrl) => {
         if (runtimeUrl !== backendUrl) {
-          console.log('🔄 Actualizando backend URL desde runtime-config:', runtimeUrl);
+          console.log(
+            '🔄 Actualizando backend URL desde runtime-config:',
+            runtimeUrl
+          );
           setBackendUrl(runtimeUrl);
         }
       })

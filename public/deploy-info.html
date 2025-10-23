@@ -138,14 +138,17 @@
           };
 
           document.getElementById('mode').textContent = buildInfo.mode;
-          document.getElementById('backend-url').textContent = buildInfo.backendUrl;
-          document.getElementById('timestamp').textContent = buildInfo.timestamp;
+          document.getElementById('backend-url').textContent =
+            buildInfo.backendUrl;
+          document.getElementById('timestamp').textContent =
+            buildInfo.timestamp;
 
           console.log('📦 Build Info:', buildInfo);
         } catch (error) {
           console.error('❌ Error cargando runtime-config.json:', error);
           document.getElementById('mode').textContent = 'ERROR';
-          document.getElementById('backend-url').textContent = 'Error cargando config';
+          document.getElementById('backend-url').textContent =
+            'Error cargando config';
           document.getElementById('timestamp').textContent = '-';
         }
       }

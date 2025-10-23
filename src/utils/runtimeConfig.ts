@@ -39,10 +39,14 @@ export async function loadRuntimeConfig(): Promise<RuntimeConfig> {
       console.log('✅ Runtime config cargada:', config);
       return config;
     } catch (error) {
-      console.warn('⚠️ No se pudo cargar runtime-config.json, usando fallbacks:', error);
+      console.warn(
+        '⚠️ No se pudo cargar runtime-config.json, usando fallbacks:',
+        error
+      );
       // Fallback a import.meta.env o localhost
       const fallbackConfig: RuntimeConfig = {
-        VITE_BACKEND_URL: import.meta.env.VITE_BACKEND_URL || 'http://localhost:3001',
+        VITE_BACKEND_URL:
+          import.meta.env.VITE_BACKEND_URL || 'http://localhost:3001',
         MODE: import.meta.env.MODE || 'development',
         BUILD_TIME: new Date().toISOString(),
       };

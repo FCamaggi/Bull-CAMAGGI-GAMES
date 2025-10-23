@@ -35,11 +35,16 @@ export default function LobbyPage({ game }: LobbyPageProps) {
   const blueTeam = lobby.teams.blue || [];
   const redTeam = lobby.teams.red || [];
 
-  // Calcular espacios disponibles para jugadores activos
+  // Calcular espacios disponibles para jugadores activos y espectadores
   const blueActiveCount = blueTeam.filter((p: any) => p.role === 'active').length;
   const redActiveCount = redTeam.filter((p: any) => p.role === 'active').length;
-  const blueActiveSlotsAvailable = 2 - blueActiveCount;
-  const redActiveSlotsAvailable = 2 - redActiveCount;
+  const blueSpectatorCount = blueTeam.filter((p: any) => p.role === 'spectator').length;
+  const redSpectatorCount = redTeam.filter((p: any) => p.role === 'spectator').length;
+  
+  const blueActiveSlotsAvailable = 4 - blueActiveCount;
+  const redActiveSlotsAvailable = 4 - redActiveCount;
+  const blueSpectatorSlotsAvailable = 8 - blueSpectatorCount;
+  const redSpectatorSlotsAvailable = 8 - redSpectatorCount;
 
   return (
     <div className="min-h-screen bg-primary py-lg">
@@ -86,8 +91,8 @@ export default function LobbyPage({ game }: LobbyPageProps) {
               <div className="text-sm text-blue-900">
                 <p className="font-semibold mb-2">ℹ️ Cómo funcionan los roles:</p>
                 <ul className="space-y-1 list-disc list-inside">
-                  <li><strong>Jugadores Activos (✍️):</strong> Los primeros 2 de cada equipo. Escriben respuestas falsas en cada ronda.</li>
-                  <li><strong>Público (👀):</strong> Jugadores 3+ de cada equipo. Solo votan, no escriben respuestas.</li>
+                  <li><strong>Jugadores Activos (✍️):</strong> Los primeros 4 de cada equipo. Escriben respuestas falsas en cada ronda.</li>
+                  <li><strong>Público (👀):</strong> Hasta 8 personas por equipo. Solo votan, no escriben respuestas.</li>
                   <li><strong>Host (👑):</strong> Controla el juego pero no juega.</li>
                 </ul>
               </div>
@@ -98,10 +103,10 @@ export default function LobbyPage({ game }: LobbyPageProps) {
           <div className="card">
             <div className="flex items-center justify-between mb-md">
               <h2 className="text-xl font-bold text-blue">🔵 Equipo Azul</h2>
-              <div className="text-right">
-                <div className="text-sm text-muted">{blueTeam.length} jugadores</div>
+              <div className="text-right text-sm">
+                <div className="font-medium">{blueTeam.length} jugadores</div>
                 <div className="text-xs text-muted">
-                  {blueActiveCount}/2 activos • {blueTeam.length - blueActiveCount} público
+                  ✍️ {blueActiveCount}/4 activos • 👀 {blueSpectatorCount}/8 público
                 </div>
               </div>
             </div>
@@ -166,7 +171,8 @@ export default function LobbyPage({ game }: LobbyPageProps) {
               onClick={() => handleSelectTeam('blue')}
               disabled={
                 isHost || 
-                currentPlayer?.team === 'blue'
+                currentPlayer?.team === 'blue' ||
+                (blueActiveSlotsAvailable === 0 && blueSpectatorSlotsAvailable === 0)
               }
               className="btn btn-blue w-full"
             >
@@ -174,9 +180,11 @@ export default function LobbyPage({ game }: LobbyPageProps) {
                 ? '👑 El Host no juega'
                 : currentPlayer?.team === 'blue'
                 ? `${currentPlayer.role === 'active' ? '✍️ ' : '👀 '}En Equipo Azul`
+                : blueActiveSlotsAvailable === 0 && blueSpectatorSlotsAvailable === 0
+                ? '❌ Equipo Lleno'
                 : blueActiveSlotsAvailable > 0 
-                ? `Unirse como Activo (${blueActiveSlotsAvailable} lugares)`
-                : 'Unirse como Público'}
+                ? `✍️ Unirse como Activo (${blueActiveSlotsAvailable} lugares)`
+                : `👀 Unirse como Público (${blueSpectatorSlotsAvailable} lugares)`}
             </button>
           </div>
 
@@ -184,10 +192,10 @@ export default function LobbyPage({ game }: LobbyPageProps) {
           <div className="card">
             <div className="flex items-center justify-between mb-md">
               <h2 className="text-xl font-bold text-red">🔴 Equipo Rojo</h2>
-              <div className="text-right">
-                <div className="text-sm text-muted">{redTeam.length} jugadores</div>
+              <div className="text-right text-sm">
+                <div className="font-medium">{redTeam.length} jugadores</div>
                 <div className="text-xs text-muted">
-                  {redActiveCount}/2 activos • {redTeam.length - redActiveCount} público
+                  ✍️ {redActiveCount}/4 activos • 👀 {redSpectatorCount}/8 público
                 </div>
               </div>
             </div>
@@ -252,7 +260,8 @@ export default function LobbyPage({ game }: LobbyPageProps) {
               onClick={() => handleSelectTeam('red')}
               disabled={
                 isHost || 
-                currentPlayer?.team === 'red'
+                currentPlayer?.team === 'red' ||
+                (redActiveSlotsAvailable === 0 && redSpectatorSlotsAvailable === 0)
               }
               className="btn btn-red w-full"
             >
@@ -260,9 +269,11 @@ export default function LobbyPage({ game }: LobbyPageProps) {
                 ? '👑 El Host no juega'
                 : currentPlayer?.team === 'red'
                 ? `${currentPlayer.role === 'active' ? '✍️ ' : '👀 '}En Equipo Rojo`
+                : redActiveSlotsAvailable === 0 && redSpectatorSlotsAvailable === 0
+                ? '❌ Equipo Lleno'
                 : redActiveSlotsAvailable > 0 
-                ? `Unirse como Activo (${redActiveSlotsAvailable} lugares)`
-                : 'Unirse como Público'}
+                ? `✍️ Unirse como Activo (${redActiveSlotsAvailable} lugares)`
+                : `👀 Unirse como Público (${redSpectatorSlotsAvailable} lugares)`}
             </button>
           </div>
         </div>

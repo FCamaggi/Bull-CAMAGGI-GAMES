@@ -1,0 +1,5 @@
+{
+  "VITE_BACKEND_URL": "http://localhost:3001",
+  "MODE": "development",
+  "BUILD_TIME": "2025-10-23T01:33:18.484Z"
+}
