@@ -73,9 +73,11 @@ export function useSocket(options: UseSocketOptions = {}) {
     try {
       const socket = io(backendUrl, {
         autoConnect: false,
-        transports: ['websocket', 'polling'],
+        transports: ['websocket'], // FORZAR SOLO WEBSOCKET
+        upgrade: false, // No permitir upgrade/downgrade
         timeout: 10000,
-        retries: 3,
+        reconnectionDelay: 1000,
+        reconnectionAttempts: 5,
       }) as SocketType;
 
       // Event listeners para estado de conexión
