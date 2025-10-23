@@ -83,7 +83,14 @@ export function useSocket(options: UseSocketOptions = {}) {
       // Event listeners para estado de conexión
       socket.on('connect', () => {
         console.log('✅ Conectado al servidor');
+        console.log('🚀 Transport:', socket.io.engine.transport.name);
+        console.log('🆔 Socket ID:', socket.id);
         setState((prev) => ({ ...prev, connected: true, error: null }));
+        
+        // Log si el transport cambia
+        socket.io.engine.on('upgrade', (transport: any) => {
+          console.log('⬆️ Transport upgraded to:', transport.name);
+        });
       });
 
       socket.on('disconnect', (reason) => {
@@ -152,6 +159,8 @@ export function useSocket(options: UseSocketOptions = {}) {
         event,
         hasSocket: !!socket,
         isConnected: socket?.connected,
+        socketId: socket?.id,
+        transport: socket?.io?.engine?.transport?.name,
         args
       });
       
