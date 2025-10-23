@@ -162,7 +162,12 @@ export function useSocket(options: UseSocketOptions = {}) {
       }
 
       console.log('✅ Emitiendo evento:', event, args);
+      
+      // Intentar emitir de diferentes formas para debug
       socket.emit(event, ...args);
+      
+      // Log para confirmar que se emitió
+      console.log('📤 Evento emitido al socket');
     },
     []
   );
