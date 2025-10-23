@@ -14,9 +14,8 @@ export default function HostLobbyView({ lobby, socket }: HostLobbyViewProps) {
   const blueActiveReady = lobby.teams?.blue?.filter((p: any) => p.role === 'active' && p.isReady).length || 0;
   const redActiveReady = lobby.teams?.red?.filter((p: any) => p.role === 'active' && p.isReady).length || 0;
   
-  // Verificar si se puede iniciar
-  const canStart = blueActive > 0 && redActive > 0 && 
-                   blueActiveReady === blueActive && redActiveReady === redActive;
+  // Verificar si se puede iniciar (al menos 1 activo por equipo)
+  const canStart = blueActive > 0 && redActive > 0;
 
   return (
     <div className="min-h-screen bg-primary p-lg">
@@ -169,6 +168,33 @@ export default function HostLobbyView({ lobby, socket }: HostLobbyViewProps) {
           <h3 className="text-2xl font-bold text-primary mb-md">
             👑 Controles del Host
           </h3>
+          
+          {/* Estado de jugadores listos */}
+          {blueActive > 0 && redActive > 0 && (
+            <div className="mb-md p-md bg-gray-50 rounded-lg">
+              <div className="grid grid-cols-2 gap-md text-sm">
+                <div>
+                  <p className="text-gray-600">Equipo Azul Listos:</p>
+                  <p className="text-2xl font-bold text-blue">{blueActiveReady}/{blueActive}</p>
+                </div>
+                <div>
+                  <p className="text-gray-600">Equipo Rojo Listos:</p>
+                  <p className="text-2xl font-bold text-red">{redActiveReady}/{redActive}</p>
+                </div>
+              </div>
+              {(blueActiveReady < blueActive || redActiveReady < redActive) && (
+                <p className="text-xs text-yellow-600 mt-2">
+                  ⚠️ Algunos jugadores activos no están listos, pero puedes iniciar igualmente
+                </p>
+              )}
+              {blueActiveReady === blueActive && redActiveReady === redActive && (
+                <p className="text-xs text-green-600 mt-2 font-bold">
+                  ✅ ¡Todos los jugadores activos están listos!
+                </p>
+              )}
+            </div>
+          )}
+          
           <div className="space-y-md">
             <button
               className="btn btn-success text-lg px-xl py-md w-full md:w-auto"
@@ -183,17 +209,8 @@ export default function HostLobbyView({ lobby, socket }: HostLobbyViewProps) {
             </button>
             {!canStart && (
               <div className="text-sm text-secondary">
-                {blueActive === 0 || redActive === 0 ? (
-                  <p>⚠️ Cada equipo necesita al menos 1 jugador activo</p>
-                ) : (
-                  <p>⏳ Esperando que todos los jugadores activos marquen "Listo"</p>
-                )}
+                <p>⚠️ Cada equipo necesita al menos 1 jugador activo</p>
               </div>
-            )}
-            {canStart && (
-              <p className="text-success text-sm font-medium">
-                ✅ ¡Listo para comenzar!
-              </p>
             )}
           </div>
         </div>

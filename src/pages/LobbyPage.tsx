@@ -15,8 +15,9 @@ export default function LobbyPage({ game }: LobbyPageProps) {
     );
   }
 
-  const handleSelectTeam = (team: 'blue' | 'red') => {
-    game.selectTeam(team);
+  const handleSelectTeam = (team: 'blue' | 'red', role?: 'active' | 'spectator') => {
+    console.log('🎮 handleSelectTeam:', { team, role });
+    game.selectTeam(team, role);
   };
 
   const handleToggleReady = () => {
@@ -167,25 +168,37 @@ export default function LobbyPage({ game }: LobbyPageProps) {
               )}
             </div>
 
-            <button
-              onClick={() => handleSelectTeam('blue')}
-              disabled={
-                isHost || 
-                currentPlayer?.team === 'blue' ||
-                (blueActiveSlotsAvailable === 0 && blueSpectatorSlotsAvailable === 0)
-              }
-              className="btn btn-blue w-full"
-            >
-              {isHost 
-                ? '👑 El Host no juega'
-                : currentPlayer?.team === 'blue'
-                ? `${currentPlayer.role === 'active' ? '✍️ ' : '👀 '}En Equipo Azul`
-                : blueActiveSlotsAvailable === 0 && blueSpectatorSlotsAvailable === 0
-                ? '❌ Equipo Lleno'
-                : blueActiveSlotsAvailable > 0 
-                ? `✍️ Unirse como Activo (${blueActiveSlotsAvailable} lugares)`
-                : `👀 Unirse como Público (${blueSpectatorSlotsAvailable} lugares)`}
-            </button>
+            {/* Botones de unirse */}
+            {!isHost && currentPlayer?.team !== 'blue' ? (
+              <div className="space-y-sm">
+                <button
+                  onClick={() => handleSelectTeam('blue', 'active')}
+                  disabled={blueActiveSlotsAvailable === 0}
+                  className="btn btn-blue w-full"
+                >
+                  {blueActiveSlotsAvailable === 0
+                    ? '❌ Sin cupos de Activos'
+                    : `✍️ Unirse como ACTIVO (${blueActiveSlotsAvailable}/4)`}
+                </button>
+                <button
+                  onClick={() => handleSelectTeam('blue', 'spectator')}
+                  disabled={blueSpectatorSlotsAvailable === 0}
+                  className="btn btn-secondary w-full"
+                >
+                  {blueSpectatorSlotsAvailable === 0
+                    ? '❌ Sin cupos de Público'
+                    : `👀 Unirse como PÚBLICO (${blueSpectatorSlotsAvailable}/8)`}
+                </button>
+              </div>
+            ) : isHost ? (
+              <button disabled className="btn btn-secondary w-full">
+                👑 El Host no juega
+              </button>
+            ) : (
+              <button disabled className="btn btn-blue w-full">
+                {currentPlayer?.role === 'active' ? '✍️' : '👀'} En Equipo Azul
+              </button>
+            )}
           </div>
 
           {/* Equipo Rojo */}
@@ -256,25 +269,37 @@ export default function LobbyPage({ game }: LobbyPageProps) {
               )}
             </div>
 
-            <button
-              onClick={() => handleSelectTeam('red')}
-              disabled={
-                isHost || 
-                currentPlayer?.team === 'red' ||
-                (redActiveSlotsAvailable === 0 && redSpectatorSlotsAvailable === 0)
-              }
-              className="btn btn-red w-full"
-            >
-              {isHost 
-                ? '👑 El Host no juega'
-                : currentPlayer?.team === 'red'
-                ? `${currentPlayer.role === 'active' ? '✍️ ' : '👀 '}En Equipo Rojo`
-                : redActiveSlotsAvailable === 0 && redSpectatorSlotsAvailable === 0
-                ? '❌ Equipo Lleno'
-                : redActiveSlotsAvailable > 0 
-                ? `✍️ Unirse como Activo (${redActiveSlotsAvailable} lugares)`
-                : `👀 Unirse como Público (${redSpectatorSlotsAvailable} lugares)`}
-            </button>
+            {/* Botones de unirse */}
+            {!isHost && currentPlayer?.team !== 'red' ? (
+              <div className="space-y-sm">
+                <button
+                  onClick={() => handleSelectTeam('red', 'active')}
+                  disabled={redActiveSlotsAvailable === 0}
+                  className="btn btn-red w-full"
+                >
+                  {redActiveSlotsAvailable === 0
+                    ? '❌ Sin cupos de Activos'
+                    : `✍️ Unirse como ACTIVO (${redActiveSlotsAvailable}/4)`}
+                </button>
+                <button
+                  onClick={() => handleSelectTeam('red', 'spectator')}
+                  disabled={redSpectatorSlotsAvailable === 0}
+                  className="btn btn-secondary w-full"
+                >
+                  {redSpectatorSlotsAvailable === 0
+                    ? '❌ Sin cupos de Público'
+                    : `👀 Unirse como PÚBLICO (${redSpectatorSlotsAvailable}/8)`}
+                </button>
+              </div>
+            ) : isHost ? (
+              <button disabled className="btn btn-secondary w-full">
+                👑 El Host no juega
+              </button>
+            ) : (
+              <button disabled className="btn btn-red w-full">
+                {currentPlayer?.role === 'active' ? '✍️' : '👀'} En Equipo Rojo
+              </button>
+            )}
           </div>
         </div>
 

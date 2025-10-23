@@ -281,10 +281,15 @@ export const useGame = () => {
     }, [emit]),
 
     selectTeam: useCallback(
-      (team: 'blue' | 'red') => {
-        emit('select_team', { team });
+      (team: 'blue' | 'red', role?: 'active' | 'spectator') => {
+        console.log('🎯 selectTeam llamado:', { team, role, connected, socket: !!socket });
+        if (!connected) {
+          console.error('❌ No conectado al servidor');
+          return;
+        }
+        emit('select_team', { team, role });
       },
-      [emit]
+      [emit, connected, socket]
     ),
 
     toggleReady: useCallback(() => {
@@ -363,12 +368,9 @@ export const useGame = () => {
     const blueActive = appState.lobby.teams.blue.filter((p) => p.role === 'active');
     const redActive = appState.lobby.teams.red.filter((p) => p.role === 'active');
     
-    if (blueActive.length === 0 || redActive.length === 0) return false;
-    
-    // Verificar que todos los jugadores ACTIVOS estén listos
-    // Los espectadores no necesitan marcar ready
-    const activePlayers = appState.lobby.players.filter((p) => p.role === 'active');
-    return activePlayers.every((p) => p.isReady);
+    // Solo requerir al menos 1 jugador activo por equipo
+    // El host puede iniciar aunque no todos estén listos
+    return blueActive.length > 0 && redActive.length > 0;
   }, [appState.lobby, isHost]);
 
   const computed = {
